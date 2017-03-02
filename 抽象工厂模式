@@ -1,0 +1,92 @@
+/*********************************************** Product.h  *************************************************************/
+#pragma once
+#include <iostream>
+using namespace std;
+
+/*    Cpp Code Style   */
+class CppCodeStyle {
+public:
+	virtual void DisplayCodeStyle() = 0;
+};
+
+class WindowsCppCodeStyle :public CppCodeStyle {
+public:
+	void DisplayCodeStyle() {
+		cout << "比较Windows下的CPP文件！" << endl;
+	}
+};
+
+class LinuxCppCodeStyle :public CppCodeStyle {
+public:
+	void DisplayCodeStyle() {
+		cout << "比较Linux下的CPP文件！" << endl;
+	}
+};
+
+/*    Java Code Style   */
+class JavaCodeStyle {
+public:
+	virtual void DisplayCodeStyle() = 0;
+};
+
+class WindowsJavaCodeStyle :public JavaCodeStyle {
+public:
+	void DisplayCodeStyle() {
+		cout << "比较Windows下的Java文件！" << endl;
+	}
+};
+
+class LinuxJavaCodeStyle :public JavaCodeStyle {
+	void DisplayCodeStyle() {
+		cout << "比较Linux下的Java文件！" << endl;
+	}
+};
+
+/*****************************************************ProductFactory.h*************************************************/
+#pragma once
+#include "Product.h"
+class CodeStyleFactory {
+public:
+	virtual CppCodeStyle  *CreateCpp() = 0;
+	virtual JavaCodeStyle *CreateJava() = 0;
+};
+
+class WindowsCodeStyleFactory :public CodeStyleFactory {
+public:
+	CppCodeStyle *CreateCpp() {
+		return new WindowsCppCodeStyle();
+	}
+
+	JavaCodeStyle *CreateJava() {
+		return new WindowsJavaCodeStyle();
+	}
+};
+
+class LinuxCodeStyleFactory :public CodeStyleFactory {
+public:
+	CppCodeStyle *CreateCpp() {
+		return new LinuxCppCodeStyle();
+	}
+
+	JavaCodeStyle *CreateJava() {
+		return new LinuxJavaCodeStyle();
+	}
+};
+
+/*********************************************** main ********************************************/
+#include "stdafx.h"
+#include "Product.h"
+#include "ProductFactory.h"
+#include <iostream>
+using namespace std;
+
+void  main()
+{
+	CodeStyleFactory *pWindowsCodeStyleFactory = new WindowsCodeStyleFactory();
+	CppCodeStyle *pWindowsCppCodeStyle = pWindowsCodeStyleFactory->CreateCpp();
+	pWindowsCppCodeStyle->DisplayCodeStyle();
+
+	delete pWindowsCodeStyleFactory;  pWindowsCodeStyleFactory = NULL;
+	delete pWindowsCppCodeStyle;      pWindowsCppCodeStyle = NULL;
+	system("pause");
+}
