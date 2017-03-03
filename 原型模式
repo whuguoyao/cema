@@ -1,0 +1,45 @@
+   
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+class prototype
+{
+public:
+	prototype() {}
+	virtual ~prototype() {}
+	virtual prototype* clone() = 0;//纯虚函数，需要供继承者自行实现  
+};
+
+// 派生自Prototype,实现Clone方法  
+class concreateprototype1 :public prototype
+{
+public:
+	concreateprototype1() { cout << "具体类1的构造函数！" << endl; }
+	concreateprototype1(const concreateprototype1&) { cout << "具体类1的拷贝构造函数！" << endl; }
+	virtual ~concreateprototype1() { cout << "具体类1的析构函数！" << endl; }
+	virtual prototype* clone() { return new concreateprototype1(*this); }
+};
+
+// 派生自Prototype,实现Clone方法  
+class concreateprototype2 :public prototype
+{
+public:
+	concreateprototype2() { cout << "具体类2的构造函数！" << endl; }
+	concreateprototype2(const concreateprototype2 &) { cout << "具体类2的拷贝构造函数！" << endl; }
+	virtual ~concreateprototype2() { cout << "具体类2的析构函数！" << endl; }
+	virtual prototype* clone() { return new concreateprototype2(*this); }
+};
+
+void  main()
+{
+	prototype *ptype1 = new concreateprototype1();
+	prototype *copytype1 = ptype1->clone();
+
+	ptype1 = new concreateprototype2();
+	copytype1 = ptype1->clone();
+
+	delete ptype1;
+	delete copytype1;
+	system("pause");
+}
