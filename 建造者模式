@@ -1,0 +1,142 @@
+/******************************************** PLAYER_H ************************************************/
+#pragma once
+#include <string>
+#include <iostream>
+using namespace std;
+
+class CPlayer
+{
+public:
+	CPlayer(){m_StrMenu =m_StrWindow=m_StrPlayList=m_StrCollectList=m_StrControlBar= "";}
+	~CPlayer();
+public:
+	//Interface for attributes
+	void SetMenu(string strMenu) { m_StrMenu = strMenu; }
+	void SetWindow(string strWindow) { m_StrWindow = strWindow; }
+	void SetPlayList(string strPlayList) { m_StrPlayList = strPlayList; }
+	void SetControlBar(string strControlBar) { m_StrControlBar = strControlBar; }
+	void SetCollectList(string strCollectList) { m_StrCollectList = strCollectList; }
+
+	string GetMenu() const { return m_StrMenu; }
+	string GetWindow() const { return m_StrWindow; }
+	string GetPlayList() const { return m_StrPlayList; }
+	string GetControlBar() const { return m_StrControlBar; }
+	string GetCollectList() const { return m_StrCollectList; }
+
+	void Display(){
+      cout << "----" << m_StrMenu << endl;
+      cout << "----" << m_StrWindow << endl;
+      cout << "----" << m_StrPlayList << endl;
+      cout << "----" << m_StrControlBar << endl;
+      cout << "----" << m_StrCollectList << endl << endl;
+  }
+  
+private:
+	string m_StrMenu;
+	string m_StrWindow;
+	string m_StrPlayList;
+	string m_StrControlBar;
+	string m_StrCollectList;
+};
+
+
+/******************************************** PLAYER_PATTERN_H ************************************************/
+#pragma once
+#include "Player.h"
+#include <string>
+#include <iostream>
+using namespace std;
+
+class CPlayerPattern
+{
+public:
+	CPlayerPattern() { m_pPlayer = new CPlayer(); }
+    ~CPlayerPattern() {
+		if (m_pPlayer) { delete m_pPlayer; m_pPlayer = NULL;}
+	}
+
+public:
+	CPlayer *GetPlayer() const { return m_pPlayer; }
+
+	virtual void BuildMenu() = 0;
+	virtual void BuildWindow() = 0;
+	virtual void BuildPlayList() = 0;
+	virtual void BuildControlBar() = 0;
+	virtual void BuildCollectList() = 0;
+
+	CPlayer *StartConstruct() {
+		BuildMenu();
+		BuildWindow();
+		BuildPlayList();
+		BuildControlBar();
+		BuildCollectList();
+
+		return m_pPlayer;
+	}
+protected:
+	CPlayer *m_pPlayer;
+};
+
+
+//完整播放模式  
+class CFullPattern : public CPlayerPattern
+{
+public:
+	void BuildMenu() { m_pPlayer->SetMenu("主菜单"); }
+	void BuildWindow() { m_pPlayer->SetWindow("主界面窗口"); }
+	void BuildPlayList() { m_pPlayer->SetPlayList("播放列表"); }
+	void BuildControlBar() { m_pPlayer->SetControlBar("进度条"); }
+	void BuildCollectList() { m_pPlayer->SetCollectList(" "); }
+};
+
+
+//精简播放模式  
+class CSimplePattern : public CPlayerPattern
+{
+public:
+	void BuildMenu() { m_pPlayer->SetMenu(" "); }
+	void BuildWindow() { m_pPlayer->SetWindow("主界面窗口"); }
+	void BuildPlayList() { m_pPlayer->SetPlayList(" "); }
+	void BuildControlBar() { m_pPlayer->SetControlBar("进度条"); }
+	void BuildCollectList() { m_pPlayer->SetCollectList(" "); }
+};
+
+
+//记忆播放模式  
+class CMemoryPattern : public CPlayerPattern
+{
+public:
+	void BuildMenu() { m_pPlayer->SetMenu(" "); }
+	void BuildWindow() { m_pPlayer->SetWindow("主界面窗口"); }
+	void BuildPlayList() { m_pPlayer->SetPlayList(" "); }
+	void BuildControlBar() { m_pPlayer->SetControlBar("进度条"); }
+	void BuildCollectList() { m_pPlayer->SetCollectList("收藏列表"); }
+};
+
+
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include "Player.h"
+#include "PlayerPattern.h"
+#include <iostream>
+using namespace std;
+
+void  main()
+{
+	CPlayer * pPlayer = NULL;
+
+	CPlayerPattern * pFullPattern = new CFullPattern();
+	CPlayerPattern * pSimplePattern = new CSimplePattern();
+	cout << "完整播放模式:" << endl;
+	pPlayer = pFullPattern->StartConstruct();
+	pPlayer->Display();
+	cout << endl;
+  
+  cout << "精简播放模式:" << endl;
+	pPlayer = pSimplePattern->StartConstruct();
+	pPlayer->Display();
+
+	delete pFullPattern;   pFullPattern = NULL;
+	delete pSimplePattern;  pSimplePattern = NULL;
+	system("pause");
+}
