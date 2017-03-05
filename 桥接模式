@@ -1,0 +1,57 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+
+
+class CTongXunLu {
+public:
+	CTongXunLu() {}
+	virtual ~CTongXunLu() {}
+	virtual void Show() = 0;
+	virtual CTongXunLu * Clone() = 0;
+};
+
+class CMiniTongXunLu :public CTongXunLu {
+public:
+	CMiniTongXunLu() {}
+	~CMiniTongXunLu() {}
+	void Show() { cout <<"迷你通讯录！"<< endl; }
+	CMiniTongXunLu *Clone() { return new CMiniTongXunLu(*this); }
+};
+
+
+
+class CPhone {
+public: 
+	CPhone() { m_pTongXunLu = NULL; }
+	virtual ~CPhone() {
+		if (m_pTongXunLu) { delete m_pTongXunLu; m_pTongXunLu = NULL; }
+	}
+
+	void Assemble(CTongXunLu *pTongXunLu) { this->m_pTongXunLu = pTongXunLu->Clone(); }
+	virtual void Show() = 0;
+protected:
+	CTongXunLu *m_pTongXunLu;
+};
+
+class COPPO :public CPhone {
+public:
+	COPPO() {}
+	~COPPO() {}
+	void Show() { cout << "OPPO 手机！" << endl;  this->m_pTongXunLu->Show(); }
+};
+
+
+
+void  main()
+{
+  	CTongXunLu *pTongXunLu = new CMiniTongXunLu();
+	  CPhone *pPhone = new COPPO();
+	  pPhone->Assemble(pTongXunLu);
+	  pPhone->Show();
+
+  	delete pTongXunLu;   pTongXunLu = NULL;
+	  delete pPhone;  pPhone = NULL;
+	  system("pause");
+}
