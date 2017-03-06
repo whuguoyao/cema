@@ -1,0 +1,68 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+#include <vector>
+using namespace std;
+class CMenu {
+public:
+	CMenu() { m_strName = ""; }
+	CMenu(string strName) { m_strName = strName; }
+	virtual ~CMenu() {};
+
+public:
+	virtual void Add(CMenu *pMenu) {};
+	virtual void Remove(CMenu *pMenu) {};
+	virtual CMenu *GetChild(const int &index) { return nullptr; }
+	virtual void Display() {};
+protected:
+	string m_strName;
+};
+
+class CSubMenu :public CMenu {
+public:
+	CSubMenu() {};
+	CSubMenu(string strName) :CMenu(strName) {}
+	virtual ~CSubMenu() {}
+
+	void Display() { cout << m_strName.c_str() << endl; }
+};
+
+class CCompositeMenu :public CMenu {
+public:
+	CCompositeMenu() {};
+	CCompositeMenu(string strName) :CMenu(strName) {}
+	virtual ~CCompositeMenu() {}
+
+public:
+	void Add(CMenu *pMenu) { m_vMenu.push_back(pMenu); }
+	void Remove(CMenu *pMenu) {}       //这个函数的实现还有点问题，以后再改！
+    virtual CMenu *GetChild(const int &index) const { return m_vMenu[index]; }
+	void Display() {
+		cout << "+" << m_strName.c_str() << endl;
+		vector<CMenu *>::iterator pIter = m_vMenu.begin();
+		for (; pIter != m_vMenu.end(); ++pIter) {
+			cout << "|-";
+			(*pIter)->Display();
+		}
+	}
+protected:
+	vector<CMenu *> m_vMenu;
+};
+
+
+
+void  main()
+{
+	CMenu* pMenu1 = new CCompositeMenu("国内新闻");
+	CMenu *pSubMenu1 = new CSubMenu("时事新闻");
+	CMenu *pSubMenu2 = new CSubMenu("社会新闻");
+	
+	pMenu1->Add(pSubMenu1);
+	pMenu1->Add(pSubMenu2);
+	pMenu1->Display();
+
+	delete pSubMenu1;   pSubMenu1 = NULL;
+	delete pSubMenu2;   pSubMenu2 = NULL;
+	delete pMenu1;      pMenu1 = NULL;
+	system("pause");
+}
