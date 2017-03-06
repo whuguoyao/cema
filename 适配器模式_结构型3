@@ -1,0 +1,41 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+class CTarget {
+public:
+	virtual CTarget *Clone() = 0;
+	virtual void Request() { cout <<"Target Request！" << endl; }
+};
+
+class CAdaptee {
+public:
+	void SpecialRequest() { cout << "Special Request!"<<endl; }
+};
+
+//类适配方式
+class CAdapter :public CTarget, CAdaptee {
+   virtual CTarget *Clone(){return new CAdapter(*this);}	
+   void Request() { this->SpecialRequest(); }
+};
+
+//对象适配方式
+class CAdapter :public CTarget {
+public:
+	CAdapter(CAdaptee *pAdaptee = NULL) { m_pAdaptee = pAdaptee; }
+	~CAdapter() { if (m_pAdaptee) { delete m_pAdaptee; m_pAdaptee = NULL; } }
+
+	virtual CTarget*Clone() { return new CAdapter(*this); }
+	void Request() { m_pAdaptee->SpecialRequest(); }
+protected:
+	CAdaptee *m_pAdaptee;
+};
+
+void  main()
+{
+	CTarget *pAdapter = new CAdapter();
+	pAdapter->Request();
+
+	delete pAdapter;  pAdapter = NULL;
+	system("pause");
+}
