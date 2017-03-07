@@ -1,0 +1,43 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+#include <vector>
+using namespace std;
+class CCPU {
+public:
+	virtual void State() { cout <<"CPU开始启动。"<< endl; }
+};
+
+class CMemory {
+public:
+	virtual void State() { cout <<"Memory开始启动。"<< endl; }
+};
+
+class CHardDisk {
+public:
+	virtual void State() { cout <<"HardDisk开始启动。"<< endl; }
+};
+
+class CComputer {
+public:
+	CComputer(CCPU cpu, CMemory memory, CHardDisk harddisk) {
+		m_cpu = cpu;   m_memory = memory;  m_harddisk = harddisk;
+	}
+	virtual void Run() {
+		m_cpu.State();
+		m_memory.State();
+		m_harddisk.State();
+	}
+protected:
+	CCPU m_cpu;   
+	CMemory m_memory;
+	CHardDisk m_harddisk;
+};
+
+void  main()
+{
+	CCPU cpu;    CMemory mem;   CHardDisk hard;
+	CComputer com(cpu,mem,hard);
+	com.Run();
+	system("pause");
+}
