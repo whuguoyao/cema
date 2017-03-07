@@ -1,0 +1,68 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+static void PrintAttri(const char *str) {
+	cout << "|----------------------------------------------" << endl
+		<< "|" << str << ":" << endl;
+}
+
+class CTable{
+public:
+	virtual void PutTable() = 0;
+};
+
+class CSimpleTable :public CTable {
+public:
+	virtual void PutTable() {
+		PrintAttri("Name");
+		PrintAttri("Sex");
+		PrintAttri("Age");
+		PrintAttri("Degree");
+		cout << "|----------------------------------------------";
+		cout<<endl << endl << endl;
+	}
+};
+
+class CDecorateTable :public CTable {
+public:
+	CDecorateTable(CTable *pTable=NULL) :m_pTable(pTable) {}
+	virtual ~CDecorateTable() { }
+	virtual void PutTable() { m_pTable->PutTable(); }
+protected:
+	CTable *m_pTable;
+};
+
+class CExpericeTable :public CDecorateTable {
+public:
+	CExpericeTable(CTable *pTable) :CDecorateTable(pTable) {}
+	virtual void PutTable() {
+		PrintAttri("Experience");
+		CDecorateTable::PutTable();
+	}
+};
+
+class CSalaryTable :public CDecorateTable {
+public:
+	CSalaryTable(CTable *pTable) :CDecorateTable(pTable) {}
+	virtual void PutTable() {
+		PrintAttri("Salary");
+		CDecorateTable::PutTable();
+	}
+};
+
+void  main()
+{
+	CSimpleTable simpleTable;
+	cout << "原始简单表格：" << endl;
+	simpleTable.PutTable();
+
+	cout << "加入Experience后的表格：" << endl;
+	CExpericeTable expTable(&simpleTable);
+	expTable.PutTable();
+
+	cout << "加入Salary后的表格：" << endl;
+	CSalaryTable salaryTable(&expTable);
+	salaryTable.PutTable();
+	system("pause");
+}
