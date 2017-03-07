@@ -1,0 +1,40 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+class CImage {
+public:
+	CImage(string strName):m_strName(strName) {}
+	virtual ~CImage() {}
+	virtual void Show() {}
+protected:
+	string m_strName;
+};
+
+class CBigImage :public CImage{
+public:
+	CBigImage(string strName) :CImage(strName) {}
+	~CBigImage() {}
+	void Show() { cout <<"Show big image:"<<m_strName.c_str()<< endl; }
+};
+
+class CBigImageProxy :public CImage {
+public:
+	CBigImageProxy(string strName) :CImage(strName) { m_pBigImage = NULL; }
+	~CBigImageProxy() { if (m_pBigImage) { delete m_pBigImage; m_pBigImage = NULL; } }
+	void Show() {
+		if (m_pBigImage == NULL)
+			m_pBigImage = new CBigImage(m_strName);
+		m_pBigImage->Show();
+	}
+protected:
+	CBigImage *m_pBigImage;
+};
+
+void  main()
+{
+	CImage *pImage = new CBigImageProxy("Proxy.jpg");
+	pImage->Show();
+	if (pImage) { delete pImage; pImage = NULL; }
+	system("pause");
+}
