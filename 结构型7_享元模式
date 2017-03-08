@@ -130,4 +130,4 @@ void main(){
 	if (pChessBoard) { delete pChessBoard; pChessBoard = NULL; }
 	if (pPieceFactory) { delete pPieceFactory; pPieceFactory = NULL; }
 	system("pause");
-}
+} 
