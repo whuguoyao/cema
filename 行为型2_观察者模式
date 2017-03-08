@@ -1,0 +1,60 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class CSecretary;
+
+class CStockObeserver {
+public:
+	CStockObeserver(string strName="",CSecretary *secret=NULL):m_strName(strName),m_pSecret(secret){}
+	virtual void Update(); 
+protected:
+	string m_strName;
+	CSecretary *m_pSecret;
+};
+
+class CSecretary {
+public:
+	CSecretary() { m_message = "";  m_vecStockObv.resize(0); }
+	virtual void Add(CStockObeserver stockObv) { m_vecStockObv.push_back(stockObv); }
+	virtual bool Remove(int index) {
+		if (index<0 || index>m_vecStockObv.size() - 1) 
+			return false;
+		m_vecStockObv.erase(m_vecStockObv.begin()+index);
+		return true;
+	}
+
+	virtual void Notify() {
+		vector<CStockObeserver>::iterator pIter = m_vecStockObv.begin();
+		for (; pIter != m_vecStockObv.end(); ++pIter) {
+			(*pIter).Update();
+		}
+	}
+	inline string BroadCast() { return m_message; }
+	inline void ReceiveMessage(const string &message) { m_message=message; }
+protected:
+	string m_message;
+	vector<CStockObeserver> m_vecStockObv;
+};
+
+//Update函数必须放在CSecretary声明之后定义，因为用到了CSecretary的对象。
+void CStockObeserver::Update(){
+	cout << m_strName.c_str() << "," << m_pSecret->BroadCast().c_str() << "begin to work!" << endl;
+}
+
+void main(){
+	CSecretary *pSecret = new CSecretary();
+	CStockObeserver *p1 = new CStockObeserver("LiLei",pSecret);
+	CStockObeserver *p2 = new CStockObeserver("HanMei",pSecret);
+
+	pSecret->Add(*p1);     pSecret->Add(*p2);
+	pSecret->ReceiveMessage("Boss is coming in 2 minutes.");
+	pSecret->Notify();
+
+	if (p1) { delete p1; p1 = NULL; }
+	if (p2) { delete p2; p2 = NULL; }
+	if (pSecret) { delete pSecret;  pSecret = NULL; }
+	system("pause");
+}
