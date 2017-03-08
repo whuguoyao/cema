@@ -4,77 +4,72 @@
 #include <vector>
 using namespace std;
 
-template<class Item>
+template <class Item>
 class CIterator {
 public:
 	virtual void First() = 0;
 	virtual void Next() = 0;
-	virtual Item *GetCurItem() = 0;
-	virtual bool IsDone() = 0;
-	virtual ~CIterator() {}
+	virtual bool IsEnd() = 0;
+	virtual Item *GetItem() = 0;
 };
 
-template<class Item>
-class CConcreteAggregate;   //先声明了用，后定义。
+template <class Item>
+class CConcreteAggregate;
 
-template<class Item>
+template <class Item>
 class CConcreteIterator :public CIterator<Item> {
 public:
-	CConcreteIterator(CConcreteAggregate<Item> *pAggr) :m_pAggr(pAggr), m_cur(0) {}
-
-	virtual void First() { m_cur = 0; }
-	virtual void Next() { if (m_cur < m_pAggr->GetLength()) ++m_cur; }
-	virtual bool IsDone() { return ( m_cur >= m_pAggr->GetLength() ); }
-	virtual Item *GetCurItem() {
-		if (m_cur < m_pAggr->GetLength())
-			return &(*m_pAggr)[m_cur];
-		return NULL;
+	CConcreteIterator(CConcreteAggregate<Item> *pAggr):m_pAggr(pAggr),m_curPos(0) {};
+	inline virtual void First() { m_curPos = 0; }
+	inline virtual void Next() { if (m_curPos < m_pAggr->GetLength()) ++m_curPos;}
+	inline virtual bool IsEnd() { return m_curPos >= m_pAggr->GetLength(); }
+	Item *GetItem() {
+		if (IsEnd() ) return NULL;
+		return &(*m_pAggr)[m_curPos];
 	}
 protected:
-	int m_cur;
-	CConcreteAggregate<Item> *m_pAggr;   //直接用
+	int m_curPos;     //下标
+	CConcreteAggregate<Item> *m_pAggr;
 };
 
-
-template<class Item>
+template <class Item>
 class CAggregate {
 public:
-	virtual CIterator<Item>* CreateIterator() =0;
-	virtual void Initial() = 0;
-	virtual ~CAggregate() {}
+	CAggregate() {}
+	virtual ~CAggregate() {};
+	virtual CIterator<Item> *CreateIterator() = 0;
+	virtual void ReleaseIterator(CIterator<Item> **p) = 0;
 };
 
 template<class Item>
 class CConcreteAggregate :public CAggregate<Item> {
 public:
-	CConcreteAggregate() { m_vecData.resize(0); }
-	virtual void Initial() {
-		m_vecData.push_back(1);
-		m_vecData.push_back(2);
-		m_vecData.push_back(3);
-	}
 	CConcreteAggregate(vector<Item> vec) {
-		for (int i = 0; i < vec.size(); ++i) {
-			m_vecData.push_back(vec[i]);
-		}
+		for (int i = 0; i < (int)vec.size(); ++i)
+			m_vecIter.push_back(vec[i]);
 	}
+	inline int GetLength() { return m_vecIter.size(); }
+	Item &operator[](int index) { return m_vecIter[index]; }
 
-	virtual CIterator<Item> *CreateIterator() { return new CConcreteIterator<Item>(this); }
-	int GetLength()const { return m_vecData.size(); }
-	Item& operator[](int index) { return m_vecData[index]; }
+	CIterator<Item> *CreateIterator() { return new CConcreteIterator<Item>(this); }
+	void ReleaseIterator(CIterator<Item> **p) { delete (*p);  (*p) = NULL; }
 protected:
-	vector<Item> m_vecData;
+	vector<Item>  m_vecIter;
 };
 
-void main(){
-	vector<int>  vec(5,10);
-	CAggregate<int> *pAggr = new CConcreteAggregate<int>(vec);
-	CIterator<int> *pIter = pAggr->CreateIterator();
-	for (pIter->First(); !pIter->IsDone(); pIter->Next()) {
-		cout << *(pIter->GetCurItem()) << endl;
-	}
 
-	delete pIter;  pIter = NULL;
-	delete pAggr;  pAggr = NULL;
+
+void main(){
+	vector<int> vec(5,10);
+	CAggregate<int> *pAggr = new CConcreteAggregate<int>(vec);
+	CIterator<int>  *pIter = pAggr->CreateIterator();
+
+	for (pIter->First(); !pIter->IsEnd(); pIter->Next()) {
+		cout << *(pIter->GetItem()) << " ";
+	}    
+	cout << endl;
+
+	pAggr->ReleaseIterator(&pIter);
+	delete pAggr;   pAggr = NULL;
 	system("pause");
 }
