@@ -1,0 +1,132 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+#include <vector>
+#include <map>
+using namespace std;
+
+typedef struct pointTag {
+	int x, y;
+	pointTag(int _x = 0, int _y = 0):x(_x),y(_y) {}
+
+	bool operator <(const pointTag &other) const {
+		return (x<other.x   ||  (x==other.x && y<other.y));
+	}
+}POINT;
+
+typedef enum PieceColorTag {
+	BLACK,WHITE
+}PIECECOLOR;
+
+class CPiece {
+public:
+	CPiece(PIECECOLOR color):m_color(color) {}   
+	PIECECOLOR GetColor()const { return m_color; }
+
+	void SetPoint(POINT point) { m_point = point; } //Dynamic 
+	POINT GetPoint() { return m_point; }
+protected:
+	PIECECOLOR m_color;   //Internal state
+	POINT      m_point;   //External state
+};
+
+class CGomoku :public CPiece {
+public:
+	CGomoku(PIECECOLOR color) :CPiece(color) {}
+};
+
+
+class CPieceFactory {
+public:
+	CPiece *GetPiece(PIECECOLOR color) {
+		CPiece *pPiece = NULL;
+		if (m_vecPiece.empty()) {
+			pPiece = new CGomoku(color);
+			m_vecPiece.push_back(pPiece);
+		}
+		else {
+			bool bFound = false;     vector<CPiece *>::iterator pIter=m_vecPiece.begin();
+			for (; pIter != m_vecPiece.end(); pIter++) {
+				if (color == (*pIter)->GetColor()) {
+					bFound = true;
+					pPiece = *pIter;
+					break;
+				}
+			}
+			if (!bFound) {
+				pPiece = new CGomoku(color);
+				m_vecPiece.push_back(pPiece);
+			}
+		}
+		return pPiece;
+	}
+
+	~CPieceFactory() {
+		vector<CPiece *>::iterator pIter = m_vecPiece.begin();
+		for (; pIter != m_vecPiece.end(); ++pIter) {
+			delete (*pIter);  (*pIter) = NULL;
+		}
+	}
+protected:
+	vector<CPiece *> m_vecPiece;   //其实最多就存储了俩棋子，这样保证尽可能少地为棋子共有属性开辟内存
+};
+
+class CChessBoard {
+public:
+	CChessBoard(string whiteName=" ", string blackName=" ") :m_whitePlayerName(whiteName), m_blackPlayerName(blackName) {}
+	string GetWhitePlayerName() const { return m_whitePlayerName; }
+	string GetBlackPlayerName() const { return m_blackPlayerName; }
+
+	void Draw(CPiece *pPiece) {
+		if (WHITE == pPiece->GetColor()) {
+			cout << GetWhitePlayerName().c_str()<<" ";
+			cout << "draw a white at (" << pPiece->GetPoint().x << "," << pPiece->GetPoint().y << ")" << endl;
+		}
+		else {
+			cout << GetBlackPlayerName().c_str()<<" ";
+			cout << "draw a black at (" << pPiece->GetPoint().x << "," << pPiece->GetPoint().y << ")" << endl;
+		}
+		m_mapPieces.insert(pair<POINT,CPiece *>(pPiece->GetPoint(),pPiece));
+	}
+
+	void ShowAllPieces() {
+		map<POINT, CPiece *>::iterator pIter = m_mapPieces.begin();
+		for (; pIter != m_mapPieces.end(); ++pIter) {
+			if (WHITE == pIter->second->GetColor())
+				cout << "(" << pIter->first.x << "," << pIter->first.y << ") is white" << endl;
+			else 
+				cout << "(" << pIter->first.x << "," << pIter->first.y << ") is black" << endl;
+		}
+	}
+protected:
+	map<POINT, CPiece *> m_mapPieces;   //存储棋盘上已下的棋子
+	string m_whitePlayerName;
+	string m_blackPlayerName;
+};
+
+void main(){
+	CPieceFactory *pPieceFactory = new CPieceFactory();
+	CChessBoard *pChessBoard = new CChessBoard("DaMing","YongZh");
+	
+	CPiece *pPiece = pPieceFactory->GetPiece(WHITE);
+	pPiece->SetPoint(POINT(4,5));
+	pChessBoard->Draw(pPiece);
+
+	pPiece = pPieceFactory->GetPiece(BLACK);
+	pPiece->SetPoint(POINT(2,3));
+	pChessBoard->Draw(pPiece);
+
+	pPiece = pPieceFactory->GetPiece(WHITE);
+	pPiece->SetPoint(POINT(3,5));
+	pChessBoard->Draw(pPiece);
+
+	pPiece = pPieceFactory->GetPiece(BLACK);
+	pPiece->SetPoint(POINT(3, 7));
+	pChessBoard->Draw(pPiece);
+
+	pChessBoard->ShowAllPieces();
+
+	if (pChessBoard) { delete pChessBoard; pChessBoard = NULL; }
+	if (pPieceFactory) { delete pPieceFactory; pPieceFactory = NULL; }
+	system("pause");
+}
