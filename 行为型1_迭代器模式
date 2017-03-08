@@ -1,0 +1,80 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+#include <vector>
+using namespace std;
+
+template<class Item>
+class CIterator {
+public:
+	virtual void First() = 0;
+	virtual void Next() = 0;
+	virtual Item *GetCurItem() = 0;
+	virtual bool IsDone() = 0;
+	virtual ~CIterator() {}
+};
+
+template<class Item>
+class CConcreteAggregate;   //先声明了用，后定义。
+
+template<class Item>
+class CConcreteIterator :public CIterator<Item> {
+public:
+	CConcreteIterator(CConcreteAggregate<Item> *pAggr) :m_pAggr(pAggr), m_cur(0) {}
+
+	virtual void First() { m_cur = 0; }
+	virtual void Next() { if (m_cur < m_pAggr->GetLength()) ++m_cur; }
+	virtual bool IsDone() { return ( m_cur >= m_pAggr->GetLength() ); }
+	virtual Item *GetCurItem() {
+		if (m_cur < m_pAggr->GetLength())
+			return &(*m_pAggr)[m_cur];
+		return NULL;
+	}
+protected:
+	int m_cur;
+	CConcreteAggregate<Item> *m_pAggr;   //直接用
+};
+
+
+template<class Item>
+class CAggregate {
+public:
+	virtual CIterator<Item>* CreateIterator() =0;
+	virtual void Initial() = 0;
+	virtual ~CAggregate() {}
+};
+
+template<class Item>
+class CConcreteAggregate :public CAggregate<Item> {
+public:
+	CConcreteAggregate() { m_vecData.resize(0); }
+	virtual void Initial() {
+		m_vecData.push_back(1);
+		m_vecData.push_back(2);
+		m_vecData.push_back(3);
+	}
+	CConcreteAggregate(vector<Item> vec) {
+		for (int i = 0; i < vec.size(); ++i) {
+			m_vecData.push_back(vec[i]);
+		}
+	}
+
+	virtual CIterator<Item> *CreateIterator() { return new CConcreteIterator<Item>(this); }
+	int GetLength()const { return m_vecData.size(); }
+	Item& operator[](int index) { return m_vecData[index]; }
+protected:
+	vector<Item> m_vecData;
+};
+
+void main(){
+	vector<int>  vec(5,10);
+	CAggregate<int> *pAggr = new CConcreteAggregate<int>(vec);
+	CIterator<int> *pIter = pAggr->CreateIterator();
+	for (pIter->First(); !pIter->IsDone(); pIter->Next()) {
+		cout << *(pIter->GetCurItem()) << endl;
+	}
+
+	delete pIter;  pIter = NULL;
+	delete pAggr;  pAggr = NULL;
+	system("pause");
+}
