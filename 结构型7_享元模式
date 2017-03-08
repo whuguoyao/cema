@@ -9,7 +9,8 @@ typedef struct pointTag {
 	int x, y;
 	pointTag(int _x = 0, int _y = 0):x(_x),y(_y) {}
 
-	bool operator <(const pointTag &other) const {
+        //必须重载“<”符号，因为将棋子加入到map中时，会对关键字进行比较。没有默认对POINT比较的符号，必须重载。、	
+、      bool operator <(const pointTag &other) const {
 		return (x<other.x   ||  (x==other.x && y<other.y));
 	}
 }POINT;
