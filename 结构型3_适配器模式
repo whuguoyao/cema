@@ -38,4 +38,4 @@ void  main()
 
 	delete pAdapter;  pAdapter = NULL;
 	system("pause");
-}
+} 
