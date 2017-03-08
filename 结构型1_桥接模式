@@ -59,4 +59,4 @@ void  main()
   	delete pTongXunLu;   pTongXunLu = NULL;
 	  delete pPhone;  pPhone = NULL;
 	  system("pause");
-}
+} 
