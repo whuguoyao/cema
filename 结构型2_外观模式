@@ -40,4 +40,4 @@ void  main()
 	CComputer com(cpu,mem,hard);
 	com.Run();
 	system("pause");
-}
+} 
