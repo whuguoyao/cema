@@ -1,0 +1,86 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+
+class CMediator;
+class CPerson {
+public:
+	CPerson(string strName = "") :m_strName(strName) {}
+	virtual void SetMediator(CMediator *pMediator) = 0;
+	virtual void SendMessage(string message) = 0;
+	virtual void GetMessage (string message) = 0;
+	inline virtual string GetName() { return m_strName; }
+protected:
+	CMediator *m_pMediator;
+	string m_strName;
+};
+
+class CMediator {
+public:
+	virtual void Send(string message, CPerson *pPerson) {}
+	virtual void SetRenter(CPerson *pPerson) {}
+	virtual void SetLandlord(CPerson *pPerson) {}
+};
+
+class CRenter :public CPerson {
+public:
+	CRenter(string strName) :CPerson(strName) {}
+	void SetMediator(CMediator *pMediator) { m_pMediator = pMediator; }
+	void SendMessage(string message) { m_pMediator->Send(message,this); }
+	void GetMessage(string message) {
+		cout << "租户收到消息	" << message.c_str()<<endl;
+	}
+};
+
+class CLandLord :public CPerson {
+public:
+	CLandLord(string strName) :CPerson(strName) {}
+	void SetMediator(CMediator *pMediator) { m_pMediator = pMediator; }
+	void SendMessage(string message) { m_pMediator->Send(message,this); }
+	void GetMessage(string message) {
+		cout << "房东收到消息	" << message.c_str() << endl;
+	}
+};
+
+class CHouseMediator :public CMediator {
+public:
+	CHouseMediator() :m_pHouseLord(0), m_pRenter(0) {}
+	virtual void SetRenter(CPerson *pPerson) { m_pRenter = pPerson; }
+	virtual void SetLandlord(CPerson *pPerson) { m_pHouseLord = pPerson; }
+	virtual void Send(string message, CPerson *pPerson) {
+		string postMessage = "";
+		if (pPerson == m_pRenter) {
+			postMessage=m_pRenter->GetName() + "说：" + message;
+			m_pHouseLord->GetMessage(postMessage);
+		}
+		else {
+			postMessage=m_pHouseLord->GetName() + "说：" + message;
+			m_pRenter->GetMessage(postMessage);
+		}
+	}
+protected:
+	CPerson *m_pRenter;
+	CPerson *m_pHouseLord;
+};
+
+void main(){
+	CMediator *pMediator = new CHouseMediator();
+	CPerson *pRenter = new CRenter("学生小马");
+	CPerson *pLandlord = new CLandLord("海淀王先生");
+
+	pMediator->SetRenter(pRenter);
+	pMediator->SetLandlord(pLandlord);
+
+	pRenter->SetMediator(pMediator);    
+	pLandlord->SetMediator(pMediator);
+
+	//消息在HouseMediator的Send函数中集中处理。
+	pRenter->SendMessage("想在北京租一套1500元/月的房子.");
+	pLandlord->SendMessage("这儿有1500元/月的房子.");
+
+	delete pMediator;  pMediator = NULL;
+	delete pRenter;    pRenter = NULL;
+	delete pLandlord;  pLandlord = NULL;
+	system("pause");
+}
