@@ -1,0 +1,77 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+
+class CVisitor;
+class CPart {
+public:
+	CPart(string brand=" ",double price=0.0):m_brand(brand),m_price(price) {}
+	virtual void AcceptVisitor(CVisitor *pVisitor)=0;
+	//Interface
+	inline string GetBand()  const{ return m_brand; }
+	inline double GetPrice() const{ return m_price; }
+protected:
+	string m_brand;
+	double m_price;
+};
+
+class CMonitor:public CPart {
+public:
+	CMonitor(string brand = " ", double price = 0.0) :CPart(brand, price) {}
+	virtual void AcceptVisitor(CVisitor *pVisitor); 
+};
+
+class CHardDisk :public CPart {
+public:
+	CHardDisk(string brand = " ", double price = 0.0) :CPart(brand, price) {}
+	virtual void AcceptVisitor(CVisitor *pVisitor); 
+};
+
+class CVisitor {
+public:
+	virtual void Visit(CMonitor  *pMonitor) = 0;
+	virtual void Visit(CHardDisk *pHardDisk) = 0;
+};
+
+void CMonitor::AcceptVisitor(CVisitor *pVisitor) { pVisitor->Visit(this); }
+void CHardDisk::AcceptVisitor(CVisitor *pVisitor) { pVisitor->Visit(this); }
+
+class CCustomer :public CVisitor {
+public:
+	CCustomer() {  }
+	virtual void Visit(CMonitor  *pMonitor) {
+		cout << "顾客查看显示器，显示器的型号是" << pMonitor->GetBand().c_str()<<",价格是"<<pMonitor->GetPrice()<<"." << endl;
+	}
+	virtual void Visit(CHardDisk *pDisk) {
+		cout << "顾客查看硬盘，硬盘的型号是" << pDisk->GetBand().c_str() << ",价格是" << pDisk->GetPrice() << "." << endl;
+	}
+	inline double GetSumPrice(CMonitor monitor, CHardDisk harddisk) const { return monitor.GetPrice() + harddisk.GetPrice(); }
+};
+
+class CMender :public CVisitor {
+public:
+	CMender() {}
+	virtual void Visit(CMonitor *pMonitor) {
+		cout << "修理显示器" << endl;
+	}
+	virtual void Visit(CHardDisk *pHardDisk) {
+		cout << "修理硬盘" << endl;
+	}
+};
+
+void main(){
+	CMonitor monitor("HP",200.4); 
+	CHardDisk hardDisk("Intel",300.7);
+
+	CVisitor *pCustomer=new CCustomer();   CVisitor *pMender=new CMender();
+	monitor.AcceptVisitor(pCustomer);
+	monitor.AcceptVisitor(pMender);
+
+	hardDisk.AcceptVisitor(pCustomer);
+	hardDisk.AcceptVisitor(pMender);
+
+	delete pCustomer;   pCustomer = NULL;
+	delete pMender;     pMender = NULL;
+	system("pause");
+}
