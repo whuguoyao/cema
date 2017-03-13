@@ -1,0 +1,68 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+class CManager {
+public:
+	CManager(CManager *pManager = NULL, string name = " ",int priority=0) :m_pHighManager(pManager) {
+		m_strName = name;   m_priority = priority;
+	}
+	virtual bool DealRequest(string name,int salary) = 0;
+protected:
+	CManager *m_pHighManager;
+	string   m_strName;
+	int      m_priority;
+};
+
+class CCommonManager :public CManager {
+public:
+	CCommonManager(CManager *pManager = NULL, string name = " ",int priority=0) :CManager(pManager,name,priority) {}
+	virtual bool DealRequest(string name,int salary) {
+		if (salary <= m_priority) { 
+			cout << this->m_strName.c_str() << "成功受理！" << endl;
+			return true; 
+		}
+		else {
+			cout << this->m_strName.c_str() << "不能受理！" << endl;
+			m_pHighManager->DealRequest(name, salary);
+			return false;
+		}
+	}
+};
+
+class CMiddleManager :public CManager {
+public:
+	CMiddleManager(CManager *pManager = NULL, string name = " ", int priority = 0) :CManager(pManager, name, priority) {}
+	virtual bool DealRequest(string name, int salary) {
+		if (salary <= m_priority) { 
+			cout << this->m_strName.c_str() << "成功受理！" << endl;
+			return true; 
+		}
+		else {
+			cout << this->m_strName.c_str() << "不能受理！" << endl;
+			m_pHighManager->DealRequest(name, salary);
+			return false;
+		}
+	}
+};
+
+class CSuperManager :public CManager {
+public:
+	CSuperManager(CManager *pManager = NULL, string name = " ", int priority = 0) :CManager(pManager, name, priority) {}
+	virtual bool DealRequest(string name, int salary) {
+		cout << this->m_strName.c_str() << "成功受理！" << endl;
+		return true;
+	}
+};
+
+void main(){
+	CManager *pSuperManager = new CSuperManager(NULL,"A",15000);
+	CManager *pMiddleManager = new CMiddleManager(pSuperManager,"B",10000);
+	CManager *pCommonManager = new CCommonManager(pMiddleManager,"C",8000);
+	pCommonManager->DealRequest("D",99991);
+
+	delete pCommonManager; pCommonManager = NULL;
+	delete pMiddleManager; pMiddleManager = NULL;
+	delete pSuperManager;  pSuperManager = NULL;
+	system("pause");
+}
