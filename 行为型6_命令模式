@@ -1,0 +1,57 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class CBarbecuer {
+public:
+	virtual void BakeMutton() { cout <<"Bake mutton!"<< endl; }
+	virtual void BakeChicken() { cout <<"Bake chicken!"<< endl; }
+};
+
+class CCommand {
+public:
+	CCommand(CBarbecuer *pBarbecuer=NULL):m_pBarbecuer(pBarbecuer) {}
+	virtual void ExecuteCommand() = 0;
+protected:
+	CBarbecuer *m_pBarbecuer;
+};
+
+class CMuttonCommand :public CCommand {
+public:
+	CMuttonCommand(CBarbecuer *pBarbecuer = NULL) :CCommand(pBarbecuer) {}
+	virtual void ExecuteCommand() { m_pBarbecuer->BakeMutton(); }
+};
+
+class CChickenCommand :public CCommand {
+public:
+	CChickenCommand(CBarbecuer *pBarbecuer = NULL) :CCommand(pBarbecuer) {}
+	virtual void ExecuteCommand() { m_pBarbecuer->BakeChicken(); }
+};
+
+class CWaiter {
+public:
+	virtual void SetCommand(CCommand *pCommand) { m_CommandList.push_back(pCommand); }
+	virtual void Notify() {
+		vector<CCommand *>::iterator pIter;
+		for (pIter = m_CommandList.begin(); pIter != m_CommandList.end(); pIter++)
+			(*pIter)->ExecuteCommand();
+	}
+public:
+	vector<CCommand *> m_CommandList;
+};
+
+void main(){
+	CBarbecuer barbecuer;            	CWaiter waiter;
+	CCommand *pMuttonCommand = new CMuttonCommand(&barbecuer);
+	CCommand *pChickenCommand = new CChickenCommand(&barbecuer);
+	waiter.SetCommand(pMuttonCommand);
+	waiter.SetCommand(pChickenCommand);
+
+	waiter.Notify();
+
+	delete pMuttonCommand;  pMuttonCommand = NULL;
+	delete pChickenCommand; pChickenCommand = NULL;
+	system("pause");
+}
