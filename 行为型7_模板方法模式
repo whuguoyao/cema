@@ -1,0 +1,121 @@
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+#include <vector>
+#include <windows.h>
+using namespace std;
+
+#ifndef _SLOW_SHOW
+#define _SLOW_SHOW
+static void SlowShow(string str,int time=30) {
+	for (int i = 0; i < (int)str.length(); ++i) {
+		cout << str[i];
+		Sleep(time);
+	}
+	cout << endl;
+}
+#endif //Slow_Show 
+
+
+class CCaffineDrink {
+public:
+	virtual void Drink() {  
+		cout <<"Do as follow steps:"<< endl;
+		BoilWater();
+		Brew();
+		PourInCup();
+		AddCondiments();
+	}
+protected:
+	void BoilWater() { SlowShow("-->Boil Water!"); }
+	void PourInCup() { SlowShow("-->Pour Coffee Into The Cup!"); }
+
+	virtual void Brew() = 0;
+	virtual void AddCondiments() = 0;
+};
+
+//虚函数的调用需要虚函数表进行间接寻址，会降低代码运行效率。
+class CCoffee :public CCaffineDrink {
+public:
+	void Brew() { SlowShow("-->Boil Coffee In The Boiled Water!"); }
+	void AddCondiments() { SlowShow("-->Add Milk And Sugar!"); }
+};
+
+class CTea :public CCaffineDrink {
+public:
+	void Brew() { SlowShow("-->Boil Tea In The Boiled Water!"); }
+	void AddCondiments() { SlowShow("-->Add Honey!"); }
+};
+
+
+
+void main(){
+	CCaffineDrink *pCoffee = new CCoffee();    pCoffee->Drink();    cout << endl;
+	CCaffineDrink *pTea   =new CTea();           pTea->Drink();
+
+	delete pCoffee;  pCoffee = NULL;
+	delete pTea;     pTea = NULL;
+	system("pause");
+}
+
+
+点评：采用继承的方式虽然能够实现多态，但是在子对象非常多的时候，调用虚函数会使得效率降低。因为函数必须根据虚函数表间接寻址。比较好的方式使采用
+模板函数。将变化部分提取出来作为模板方式。
+
+/******************************************** main.cpp ********************************************/
+#include "stdafx.h"
+#include <iostream>
+#include <vector>
+#include <windows.h>
+using namespace std;
+
+#ifndef _SLOW_SHOW
+#define _SLOW_SHOW
+static void SlowShow(string str,int time=30) {
+	for (int i = 0; i < (int)str.length(); ++i) {
+		cout << str[i];
+		Sleep(time);
+	}
+	cout << endl;
+}
+#endif //Slow_Show 
+
+template <class T>
+class CCaffineDrink {
+public:
+	virtual void Drink() {  
+		cout <<"Do as follow steps:"<< endl;
+		BoilWater();
+		Brew();
+		PourInCup();
+		AddCondiments();
+	}
+protected:
+	void BoilWater() { SlowShow("-->Boil Water!"); }
+	void PourInCup() { SlowShow("-->Pour Coffee Into The Cup!"); }
+
+	virtual void Brew() { static_cast<T *>(this)->Brew(); }
+	virtual void AddCondiments() { static_cast<T *>(this)->Brew(); }
+};
+
+//虚函数的调用需要虚函数表进行间接寻址，会降低代码运行效率。
+class CCoffee :public CCaffineDrink<CCoffee> {
+public:
+	void Brew() { SlowShow("-->Boil Coffee In The Boiled Water!"); }
+	void AddCondiments() { SlowShow("-->Add Milk And Sugar!"); }
+};
+
+class CTea :public CCaffineDrink<CTea> {
+public:
+	void Brew() { SlowShow("-->Boil Tea In The Boiled Water!"); }
+	void AddCondiments() { SlowShow("-->Add Honey!"); }
+};
+
+
+
+void main(){
+	CCoffee pCoffee;   pCoffee.Drink();    cout << endl;
+	CTea pTea;           pTea.Drink();
+
+	system("pause");
+}
