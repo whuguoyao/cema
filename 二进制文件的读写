@@ -1,0 +1,16 @@
+  //读取tif文件
+  FILE *pFile = fopen("D:\\AbsRadianceForBias\\Data\\LC81180302014260LGN00\\040302.tif", "rb");
+	char *pBuf=NULL;
+	fseek(pFile, 0, SEEK_END);  //定位到文件末尾
+	int len = ftell(pFile);  //求文件长度
+	pBuf = new char[len + 1];
+	rewind(pFile);  //重新定位指针到文件开始处
+	fread(pBuf, 1, len, pFile);
+	fclose(pFile);
+
+	//写入刚才读取的文件
+	FILE *pFileOut = fopen("D:\\TextBin.txt", "wb");
+	fwrite(pBuf, 1, len, pFileOut);
+	fclose(pFileOut);
+
+	if (pBuf) { delete[]pBuf; pBuf = NULL; }
