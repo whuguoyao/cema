@@ -1,0 +1,110 @@
+前言
+    mem_fun_ref是由函数指针引出来的，先说说函数指针的相关用法。一个十进制的正整数有四进制和二进制两种表示方式，而这种进制方式可以写在全局函数中，也可以
+写在成员函数之中。
+
+//Code 部分
+#include <vector>
+#include <algorithm>
+#include <functional>
+#include <iostream>
+using namespace std;
+static void Quadratic(int n) {
+	int a = n % 4;
+	n = n/4;
+	if (n == 0)
+		;
+	else
+		Quadratic(n);
+
+	cout << a << " ";
+}
+
+class CFoo {
+public:
+	void FooQuadratic(const int &a) {
+		int *b = const_cast<int *>(&a);
+		Quadratic(*b);
+	}
+
+	static void Binary(int n) {
+		int a = n % 2;
+		n = n >> 1;
+		if (n == 0)
+			;
+		else
+			Binary(n);
+
+		cout<< a << " ";
+	}
+};
+
+void main()
+{
+	void(*pFunc1)(int ) = &CFoo::Binary;
+	printf("%s","运用成员函数，二进制显示方式为:");
+	pFunc1(91);
+	printf("\n");
+
+	void (CFoo::*pFunc2)(const int &) = &CFoo::FooQuadratic;
+	CFoo f;
+	printf("%s", "对象方式调用成员函数，四进制显示方式为:");
+	(f.*pFunc2)(91);
+	printf("\n");
+
+	printf("%s", "运用全局函数，四进制显示方式为:");
+    void(*pFunc)(int)=   &Quadratic;
+	pFunc(91);
+	printf("\n");
+
+	CFoo *pf =   &f;
+	printf("%s", "指针方式调用成员函数，四进制显示方式为:");
+	(pf->*pFunc2)(91);
+	printf("\n");
+    system("pause");
+ }
+     全局函数的方式不用限定函数指针的类范围，静态成员函数也与之类似。可以看出，用函数指针的方式调用形式相同而实现不同的函数，对函数指针的形式有着严格
+ 的定义。为了改善这一问题，可以采用mem_fun_ref来调用成员函数。
+ 
+class CDoor {
+public:
+	void open() {
+		cout << "Member function open the door!" << endl;
+	}
+
+	void close() {
+		cout << "Member function close the door!" << endl;
+	}
+};
+
+static void Open(CDoor door) {
+	cout << "Global function open door!" << endl;
+}
+
+class CDoorController {
+public:
+	void AddDoor(CDoor door) {
+		m_vecDoor.push_back(door);
+	}
+
+	void OpenDoor() {
+		for_each(m_vecDoor.begin(),  m_vecDoor.end(), mem_fun_ref(&CDoor::open));
+		for_each(m_vecDoor.begin(), m_vecDoor.end(), Open);
+	}
+protected:
+	vector<CDoor> m_vecDoor;
+};
+     
+ void main()
+{
+    CDoorController doorControl;
+	doorControl.AddDoor(CDoor());
+	doorControl.AddDoor(CDoor());
+
+	doorControl.OpenDoor();
+	system("pause");
+}
+    在OpenDoor()函数中，for_each采用了两种实现方式，前者调用的是成员函数，后者调用的是全局函数。不同函数的调用可以略去函数指针这个繁琐的步骤，
+    直接采用mem_fun_ref函数。形式非常干净利落。
+
+
+
